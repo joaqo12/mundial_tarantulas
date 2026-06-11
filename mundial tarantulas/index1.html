@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Simulador de Tarántulas 2026 - Profesional</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --bg:#020C18; --gold:#C9A227; --gl:#F5D26B; --gd:#9A7A1A;
+  --blue:#1E8FE1; --w:#fff; --card:rgba(255,255,255,.04); --brd:rgba(255,255,255,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--w);font-family:'Barlow',sans-serif;min-height:100vh}
+
+.tabs{display:flex;justify-content:center;gap:.7rem;padding:1rem;position:sticky;top:0;z-index:100;background:rgba(2,12,24,.93);backdrop-filter:blur(12px);border-bottom:1px solid var(--brd)}
+.tab{font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.45rem 1.2rem;border-radius:18px;cursor:pointer;border:1.5px solid rgba(255,255,255,.12);background:transparent;color:rgba(255,255,255,.4);transition:all .2s}
+.tab:hover{color:var(--w);border-color:rgba(255,255,255,.3)}
+.tab.active{background:linear-gradient(135deg,var(--gold),var(--gd));color:var(--bg);border-color:transparent}
+
+.sec{display:none;padding:1.4rem 1rem 4rem}
+.sec.vis{display:block}
+.ptitle{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.7rem,5vw,3.8rem);letter-spacing:.04em;background:linear-gradient(135deg,#F5D26B,#C9A227,#9A7A1A);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:center;margin-bottom:.25rem}
+.psub{text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:.75rem;color:rgba(255,255,255,.32);letter-spacing:.08em;text-transform:uppercase;margin-bottom:1.6rem}
+
+.actions-bar{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:.6rem;margin-bottom:1.5rem;background:rgba(255,255,255,0.02);padding:0.6rem;border-radius:8px;border:1px solid var(--brd)}
+.btn-action{font-family:'Barlow Condensed',sans-serif;font-size:.75rem;font-weight:700;text-transform:uppercase;padding:.4rem 1rem;border-radius:6px;cursor:pointer;border:1px solid var(--gold);background:rgba(201,162,39,0.1);color:var(--gl);transition:all 0.2s}
+.btn-action:hover{background:var(--gold);color:var(--bg)}
+.btn-rand{border-color:var(--blue);background:rgba(30,143,225,0.1);color:#9ee}
+.btn-rand:hover{background:var(--blue);color:var(--w)}
+.btn-reset{border-color:rgba(255,80,80,0.4);background:rgba(255,80,80,0.05);color:#ff9999}
+.btn-reset:hover{background:rgb(255,80,80);color:var(--bg)}
+.btn-sub-action{border-color:rgba(255,255,255,0.2);color:rgba(255,255,255,0.7);background:transparent}
+.btn-sub-action:hover{border-color:var(--gold);color:var(--gl)}
+.btn-mini-capt{font-size:0.58rem;font-weight:700;text-transform:uppercase;padding:0.15rem 0.4rem;border-radius:4px;border:1px solid rgba(251,210,107,0.3);background:rgba(2,12,24,0.6);color:var(--gl);cursor:pointer;margin-left:auto}
+.btn-mini-capt:hover{background:var(--gold);color:var(--bg)}
+
+/* GROUPS */
+.ggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:.9rem}
+.gcard{background:var(--card);border:1px solid var(--brd);border-radius:10px;overflow:hidden;transition:border-color .2s}
+.gcard:hover{border-color:rgba(201,162,39,.2)}
+.ghdr{background:linear-gradient(135deg,rgba(201,162,39,.12),rgba(201,162,39,.04));border-bottom:1px solid rgba(201,162,39,.14);padding:.45rem .85rem;display:flex;justify-content:space-between;align-items:center}
+.gltr{font-family:'Bebas Neue',sans-serif;font-size:1.25rem;line-height:1;background:linear-gradient(135deg,var(--gl),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.gpts{font-family:'Barlow Condensed',sans-serif;font-size:.6rem;color:rgba(255,255,255,.25);letter-spacing:.08em;text-transform:uppercase}
+
+.gtbl{width:100%;border-collapse:collapse}
+.gtbl tr{border-top:1px solid rgba(255,255,255,.05)}
+.gtbl tr.q1{background:rgba(30,143,225,.08)}
+.gtbl tr.q2{background:rgba(30,143,225,.04)}
+.gtbl tr.q3{background:rgba(201,162,39,.04)}
+.gtbl td{padding:.42rem .6rem;font-size:.75rem}
+.tcell{display:flex;align-items:center;gap:.4rem}
+.timg{width:128px;height:122px;object-fit:cover;border-radius:2px;background:rgba(255,255,255,0.05);flex-shrink:0}
+.pbdg{width:15px;height:15px;border-radius:50%;font-size:.56rem;font-weight:700;line-height:15px;text-align:center;flex-shrink:0;font-family:'Barlow Condensed',sans-serif}
+.pb1{background:var(--gold);color:var(--bg)} .pb2{background:var(--blue);color:#fff}
+.pb3{background:rgba(255,255,255,.17);color:rgba(255,255,255,.8)} .pb4{background:rgba(255,255,255,.07);color:rgba(255,255,255,.4)}
+.tname{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.5rem;letter-spacing:.02em}
+.tstat{font-family:'Barlow Condensed',sans-serif;font-size:1rem;color:rgba(255,255,255,.4);margin-left:auto;white-space:nowrap;display:flex;gap:.4rem;align-items:center}
+.tstat .tpts{color:var(--gl);font-weight:700;font-size:.82rem}
+
+.matches-section{border-top:1px solid rgba(255,255,255,.06);padding:.5rem .7rem .6rem}
+.matches-lbl{font-family:'Barlow Condensed',sans-serif;font-size:.54rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.2);margin-bottom:.4rem}
+.match-row{display:flex;align-items:center;gap:.3rem;margin-bottom:.28rem;font-family:'Barlow Condensed',sans-serif;font-size:1rem}
+.match-team{flex:1;text-align:right;color:rgba(255,255,255,.55);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.match-team.right{text-align:left}
+.match-btns{display:flex;gap:.18rem;flex-shrink:0}
+.mbtn{padding:.14rem .28rem;border-radius:3px;border:1px solid rgba(255,255,255,.1);background:transparent;color:rgba(255,255,255,.3);font-family:'Barlow Condensed',sans-serif;font-size:.62rem;font-weight:700;cursor:pointer;transition:all .12s;white-space:nowrap}
+.mbtn:hover{border-color:rgba(201,162,39,.5);color:var(--gl)}
+.mbtn.active-a{background:rgba(30,143,225,.2);border-color:var(--blue);color:#9ee}
+.mbtn.active-e{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.3);color:var(--w)}
+.mbtn.active-b{background:rgba(201,162,39,.2);border-color:var(--gold);color:var(--gl)}
+
+/* THIRDS */
+.tpanel{background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:.9rem 1.1rem 1.1rem;margin-bottom:1.4rem}
+.plbl{font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:.65rem}
+.chips{display:flex;flex-wrap:wrap;gap:.38rem}
+.chip{display:inline-flex;align-items:center;gap:.32rem;padding:.27rem .55rem;border-radius:14px;font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:700;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.52);cursor:pointer;transition:all .18s;user-select:none}
+.chip:hover{border-color:rgba(201,162,39,.4);color:var(--w)}
+.chip.sel{background:rgba(201,162,39,.14);border-color:var(--gold);color:var(--gl)}
+.chip.lck{opacity:.28;pointer-events:none}
+.ccnt{font-family:'Barlow Condensed',sans-serif;font-size:.7rem;color:rgba(255,255,255,.32);margin-top:.5rem}
+.ccnt span{color:var(--gl);font-weight:700}
+
+/* BRACKET */
+.bsec{margin-bottom:2.2rem;padding:0.5rem;border-radius:8px}
+.rlbl{font-family:'Barlow Condensed',sans-serif;font-size:.75rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);text-align:center;margin-bottom:.65rem;display:flex;justify-content:center;align-items:center;gap:0.6rem}
+.mgrid{display:flex;flex-wrap:wrap;justify-content:center;gap:.55rem}
+.mbox{width:165px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.04);cursor:pointer;transition:border-color .2s}
+.mbox:hover{border-color:rgba(201,162,39,.32)}
+.mbox.done{border-color:rgba(255,255,255,.17)}
+.mt{display:flex;align-items:center;gap:.4rem;padding:.36rem .52rem;font-family:'Barlow Condensed',sans-serif;font-size:.74rem;font-weight:600;color:rgba(255,255,255,.52);transition:background .14s,color .14s}
+.mt:first-child{border-bottom:1px solid rgba(255,255,255,.07)}
+.mt.win{background:rgba(201,162,39,.1);color:var(--gl)}
+.mt.tbd{color:rgba(255,255,255,.2);font-style:italic;font-weight:400}
+.mid{font-family:'Barlow Condensed',sans-serif;font-size:.55rem;color:rgba(255,255,255,.18);text-align:center;padding:.15rem 0;border-top:1px solid rgba(255,255,255,.05);background:rgba(255,255,255,.02)}
+
+.ccard{text-align:center;max-width:250px;margin:1.8rem auto 0;background:linear-gradient(135deg,rgba(201,162,39,.14),rgba(201,162,39,.03));border:1.5px solid rgba(201,162,39,.28);border-radius:13px;padding:1.4rem;display:none}
+.ccard.show{display:block}
+.cicn{font-size:2.3rem;margin-bottom:.35rem}
+.clbl{font-family:'Barlow Condensed',sans-serif;font-size:.68rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:.45rem}
+.cnm{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.04em;background:linear-gradient(135deg,var(--gl),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.csp{font-size:0.75rem;color:rgba(255,255,255,0.4);font-style:italic;margin-top:0.2rem;display:block}
+.cimg-final{width:120px;height:90px;object-fit:cover;border-radius:6px;margin:0.6rem auto;display:block;border:1px solid rgba(255,255,255,0.1)}
+
+.toast{position:fixed;bottom:1.7rem;left:50%;transform:translateX(-50%) translateY(65px);background:rgba(201,162,39,.95);color:var(--bg);font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:700;letter-spacing:.06em;padding:.55rem 1.4rem;border-radius:22px;z-index:9999;transition:transform .26s ease;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+@media(max-width:600px){.ggrid{grid-template-columns:1fr 1fr}.mbox{width:148px}}
+@media(max-width:380px){.ggrid{grid-template-columns:1fr}}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('groups')" id="tab-groups">🕷️ Grupos</button>
+  <button class="tab" onclick="showTab('thirds')" id="tab-thirds">📊 3ros</button>
+  <button class="tab" onclick="showTab('bracket')" id="tab-bracket">🏆 Cuadro Final</button>
+</div>
+
+<div class="sec vis" id="sec-groups">
+  <div class="ptitle">Fase de Grupos</div>
+  <p class="psub">Cargá los resultados de cada partido para calcular posiciones</p>
+  <div class="actions-bar">
+    <button class="btn-action btn-rand" onclick="randomizeAllGroups()">🔀 Mezclar Grupos Aleatoriamente</button>
+    <button class="btn-action btn-reset" onclick="resetSimulator()">🗑️ Reiniciar Todo</button>
+    <button class="btn-action" onclick="exportPhaseAsImage('sec-groups', '01-fase-de-grupos')">📸 Capturar Fase de Grupos</button>
+  </div>
+  <div class="ggrid" id="ggrid"></div>
+</div>
+
+<div class="sec" id="sec-thirds">
+  <div class="ptitle">Terceros Clasificados</div>
+  <p class="psub">Seleccioná los 8 que avanzan al cuadro</p>
+  <div class="actions-bar">
+    <button class="btn-action" onclick="exportPhaseAsImage('sec-thirds', '02-mejores-terceros')">📸 Capturar Mejores Terceros</button>
+  </div>
+  <div class="tpanel">
+    <div class="plbl">🔢 Elegí 8 terceros</div>
+    <div class="chips" id="chips"></div>
+    <div class="ccnt" id="ccnt">Seleccionados: <span>0</span> / 8</div>
+  </div>
+</div>
+
+<div class="sec" id="sec-bracket">
+  <div class="ptitle">Cuadro Eliminatorio</div>
+  <p class="psub">Clic en un ejemplar para elegirlo ganador o capturá rondas individuales</p>
+  <div class="actions-bar">
+    <button class="btn-action" onclick="exportPhaseAsImage('sec-bracket', '03-cuadro-completo')">📸 Capturar Cuadro Completo</button>
+    <button class="btn-action btn-sub-action" onclick="exportPhaseAsImage('bsec-16avos', '04-ronda-16avos')">📸 Sólo 16avos</button>
+    <button class="btn-action btn-sub-action" onclick="exportPhaseAsImage('bsec-8vos', '05-ronda-octavos')">📸 Sólo Octavos</button>
+    <button class="btn-action btn-sub-action" onclick="exportPhaseAsImage('bsec-4tos', '06-ronda-cuartos')">📸 Sólo Cuartos</button>
+    <button class="btn-action btn-sub-action" onclick="exportPhaseAsImage('bsec-semis', '07-ronda-semifinales')">📸 Sólo Semis/Final</button>
+  </div>
+  <div id="bkt"></div>
+  <div class="ccard" id="ccard">
+    <div class="cicn">🏆</div>
+    <div class="clbl">Especie Campeona Absoluta</div>
+    <img id="cimg-final" src="" style="display:none;" alt="Campeón" crossOrigin="anonymous" />
+    <div class="cnm" id="cnm"></div>
+    <span class="csp" id="csp"></span>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const TEAM_INFO = {
+  "AVI": { "name": "A. avicularia", "wiki": "Avicularia_avicularia" },
+  "BSM": { "name": "B. smithi", "wiki": "Brachypelma_smithi" },
+  "BEM": { "name": "B. emilia", "wiki": "Brachypelma_emilia" },
+  "MBA": { "name": "M. balfouri", "wiki": "Monocentropus_balfouri" },
+  "HPU": { "name": "H. pulchripes", "wiki": "Harpactira_pulchripes" },
+  "PMU": { "name": "P. murinus", "wiki": "Pterinochilus_murinus" },
+  "HMA": { "name": "H. maculata", "wiki": "Heteroscodra_maculata" },
+  "CDA": { "name": "C. darlingi", "wiki": "Ceratogyrus_darlingi" },
+  "GRO": { "name": "G. rosea", "wiki": "Grammostola_rosea" },
+  "GQU": { "name": "G. quirogai", "wiki": "Grammostola_quirogai" },
+  "GPU": { "name": "G. pulchripes", "wiki": "Grammostola_pulchripes" },
+  "CVE": { "name": "C. versicolor", "wiki": "Caribena_versicolor" },
+  "VCH": { "name": "V. chromatus", "wiki": "Vitalius_chromatus" },
+  "DPE": { "name": "D. pentaloris", "wiki": "Davus_pentaloris" },
+  "LSA": { "name": "L. sazimai", "wiki": "Lasiocyano_sazimai" },
+  "LPA": { "name": "L. parahybana", "wiki": "Lasiodora_parahybana" },
+  "PIR": { "name": "P. irminia", "wiki": "Psalmopoeus_irminia" },
+  "MLI": { "name": "M. lividus", "wiki": "Cyriopagopus_lividus" },
+  "OVI": { "name": "O. violaceopes", "wiki": "Omothymus_violaceopes" },
+  "PME": { "name": "P. metallica", "wiki": "Poecilotheria_metallica" },
+  "PRE": { "name": "P. regalis", "wiki": "Poecilotheria_regalis" },
+  "ARU": { "name": "A. rufus", "wiki": "Aspinochilus_rufus" },
+  "PHA": { "name": "P. hatihati", "wiki": "Phormingochilus_hatihati" },
+  "CNA": { "name": "C. natanicharum", "wiki": "Chilobrachys_natanicharum" },
+  "BSI": { "name": "B. simoroxigorum", "wiki": "Birupes_simoroxigorum" },
+  "HCM": { "name": "Ornithoctoninae sp. HCM", "wiki": "Ornithoctoninae" },
+  "TBL": { "name": "T. blondi", "wiki": "Theraphosa_blondi" },
+  "PAN": { "name": "P. antinous", "wiki": "Pamphobeteus_antinous" },
+  "PSO": { "name": "P. sp. Solaris", "wiki": "Pamphobeteus" },
+  "PCA": { "name": "P. cancerides", "wiki": "Phormictopus_cancerides" },
+  "CCY": { "name": "C. cyaneopubescens", "wiki": "Chromatopelma_cyaneopubescens" },
+  "AGE": { "name": "A. geniculata", "wiki": "Acanthoscurria_geniculata" },
+  "TVI": { "name": "T. violaceus", "wiki": "Tapinauchenius_violaceus" },
+  "CFI": { "name": "C. fimbriatus", "wiki": "Chilobrachys_fimbriatus" },
+  "XIM": { "name": "X. immanis", "wiki": "Xenesthis_immanis" },
+  "EMU": { "name": "E. murinus", "wiki": "Ephebopus_murinus" },
+  "TSE": { "name": "T. seladonia", "wiki": "Typhochlaena_seladonia" },
+  "HGI": { "name": "H. gigas", "wiki": "Hysterocrates_gigas" },
+  "CDE": { "name": "C. devamatha", "wiki": "Chilobrachys_devamatha" },
+  "SRU": { "name": "P. rufilata", "wiki": "Poecilotheria_rufilata" },
+  "BAL": { "name": "B. albiceps", "wiki": "Brachypelma_albiceps" },
+  "TVA": { "name": "T. vagans", "wiki": "Tliltocatl_vagans" },
+  "NTR": { "name": "N. tripepii", "wiki": "Nhandu_tripepii" },
+  "OAU": { "name": "O. aureotibialis", "wiki": "Ornithoctonus_aureotibialis" },
+  "CEL": { "name": "C. elegans", "wiki": "Cyriocosmus_elegans" },
+  "ETR": { "name": "E. truculentus Green", "wiki": "Euathlus_truculentus" },
+  "DDI": { "name": "D. diamantinensis", "wiki": "Dolichothele_diamantinensis" },
+  "ACH": { "name": "A. chacoana", "wiki": "Acanthoscurria_chacoana" }
+};
+
+const ALL_IDS = Object.keys(TEAM_INFO);
+const GROUP_KEYS = ["A","B","C","D","E","F","G","H","I","J","K","L"];
+
+// GS: grupos, MR: resultados de partidos, SEL3: terceros elegidos, KW/KL: bracket
+let GS = {}, MR = {}, SEL3 = [], KW = {}, KL = {};
+
+// MR[g][matchKey] = 'a' (gana local) | 'e' (empate) | 'b' (gana visitante)
+// matchKey = "idA_idB"
+
+function saveState() {
+  localStorage.setItem("tarantula_GS", JSON.stringify(GS));
+  localStorage.setItem("tarantula_MR", JSON.stringify(MR));
+  localStorage.setItem("tarantula_SEL3", JSON.stringify(SEL3));
+  localStorage.setItem("tarantula_KW", JSON.stringify(KW));
+  localStorage.setItem("tarantula_KL", JSON.stringify(KL));
+}
+
+function loadState() {
+  const sGS   = localStorage.getItem("tarantula_GS");
+  const sMR   = localStorage.getItem("tarantula_MR");
+  const sSEL3 = localStorage.getItem("tarantula_SEL3");
+  const sKW   = localStorage.getItem("tarantula_KW");
+  const sKL   = localStorage.getItem("tarantula_KL");
+
+  if (sGS)   GS   = JSON.parse(sGS);
+  if (sMR)   MR   = JSON.parse(sMR);
+  if (sSEL3) SEL3 = JSON.parse(sSEL3);
+  if (sKW)   KW   = JSON.parse(sKW);
+  if (sKL)   KL   = JSON.parse(sKL);
+
+  if (!sGS || Object.keys(GS).length === 0) {
+    GROUP_KEYS.forEach(g => { GS[g] = []; MR[g] = {}; });
+    randomizeAllGroups(false);
+  }
+}
+
+function resetSimulator() {
+  if (confirm("¿Estás seguro de que querés borrar todo el fixture y empezar de cero?")) {
+    localStorage.clear();
+    GS = {}; MR = {}; SEL3 = []; KW = {}; KL = {};
+    GROUP_KEYS.forEach(g => { GS[g] = []; MR[g] = {}; });
+    randomizeAllGroups(true);
+    showToast("Simulador reiniciado de cero.");
+  }
+}
+
+// Las 6 combinaciones de partidos para un grupo de 4
+function getMatchPairs(g) {
+  const ids = GS[g], pairs = [];
+  for (let i = 0; i < ids.length; i++)
+    for (let j = i+1; j < ids.length; j++)
+      pairs.push([ids[i], ids[j]]);
+  return pairs;
+}
+
+function matchKey(idA, idB) { return idA + "_" + idB; }
+
+// Tabla de posiciones por puntos: victoria=3, empate=1, derrota=0
+function calcStandings(g) {
+  const ids = GS[g];
+  const stats = {};
+  ids.forEach(id => { stats[id] = { id, pts:0, w:0, d:0, l:0, played:0 }; });
+
+  getMatchPairs(g).forEach(([idA, idB]) => {
+    const res = MR[g] && MR[g][matchKey(idA, idB)];
+    if (!res) return;
+    stats[idA].played++; stats[idB].played++;
+    if      (res === 'a') { stats[idA].pts += 3; stats[idA].w++; stats[idB].l++; }
+    else if (res === 'b') { stats[idB].pts += 3; stats[idB].w++; stats[idA].l++; }
+    else                  { stats[idA].pts++; stats[idA].d++; stats[idB].pts++; stats[idB].d++; }
+  });
+
+  return ids.slice().sort((x, y) => {
+    const sx = stats[x], sy = stats[y];
+    if (sy.pts !== sx.pts) return sy.pts - sx.pts;
+    if (sy.w   !== sx.w)   return sy.w   - sx.w;
+    return ids.indexOf(x) - ids.indexOf(y); // desempate: orden original
+  }).map(id => ({ ...stats[id] }));
+}
+
+const p1 = g => calcStandings(g)[0].id;
+const p2 = g => calcStandings(g)[1].id;
+const p3 = g => calcStandings(g)[2].id;
+
+// Wiki image cache
+const imgCache = {};
+async function fetchWikiImg(wiki) {
+  if (imgCache[wiki] !== undefined) return imgCache[wiki];
+  try {
+    const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${wiki}`);
+    const d = await r.json();
+    imgCache[wiki] = d.thumbnail?.source || null;
+  } catch { imgCache[wiki] = null; }
+  return imgCache[wiki];
+}
+
+function getSpecimenThumb(t) {
+  const uid = `wi-${Math.random().toString(36).slice(2)}`;
+  const el = `<img id="${uid}" src="" class="timg" crossOrigin="anonymous" style="display:none" alt="" />`;
+  if (t.wiki) {
+    fetchWikiImg(t.wiki).then(url => {
+      const img = document.getElementById(uid);
+      if (img && url) { img.src = url; img.style.display = ''; }
+    });
+  }
+  return el;
+}
+
+const T = id => TEAM_INFO[id] || { name: id, wiki: "" };
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 2300);
+}
+
+function randomizeAllGroups(notify = true) {
+  const shuffled = [...ALL_IDS];
+  for (let i = shuffled.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  GROUP_KEYS.forEach(g => { GS[g] = []; MR[g] = {}; });
+  SEL3.length = 0;
+  Object.keys(KW).forEach(k => delete KW[k]);
+  Object.keys(KL).forEach(k => delete KL[k]);
+
+  let idx = 0;
+  GROUP_KEYS.forEach(g => {
+    for (let m = 0; m < 4; m++) { GS[g].push(shuffled[idx]); idx++; }
+  });
+
+  saveState();
+  if (notify) showToast("¡Grupos redistribuidos aleatoriamente!");
+  renderGroups();
+  if (document.getElementById('sec-thirds').classList.contains('vis')) renderThirds();
+  if (document.getElementById('sec-bracket').classList.contains('vis')) renderBracket();
+}
+
+function showTab(t) {
+  ['groups','thirds','bracket'].forEach(s => {
+    document.getElementById('sec-'+s).classList.toggle('vis', s===t);
+    document.getElementById('tab-'+s).classList.toggle('active', s===t);
+  });
+  if (t==='thirds')  renderThirds();
+  if (t==='bracket') renderBracket();
+}
+
+function renderGroups() {
+  const grid = document.getElementById('ggrid'); grid.innerHTML = '';
+  GROUP_KEYS.forEach(g => {
+    const card = document.createElement('div'); card.className = 'gcard'; card.id = 'gc-'+g;
+    card.innerHTML = buildGroupHTML(g);
+    grid.appendChild(card);
+  });
+}
+
+function buildGroupHTML(g) {
+  const standings = calcStandings(g);
+  const rowClasses = ['q1','q2','q3',''];
+
+  const rows = standings.map((s, i) => {
+    const t = T(s.id);
+    return `<tr class="${rowClasses[i]}">
+      <td>
+        <div class="tcell">
+          <span class="pbdg pb${i+1}">${i+1}</span>
+          ${getSpecimenThumb(t)}
+          <span class="tname">${t.name}</span>
+          <span class="tstat">
+            <span class="tpts">${s.pts}</span>pts
+            &nbsp;${s.w}G ${s.d}E ${s.l}P
+          </span>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  const pairs = getMatchPairs(g);
+  const played = pairs.filter(([a,b]) => MR[g] && MR[g][matchKey(a,b)]).length;
+
+  const matchRows = pairs.map(([idA, idB]) => {
+    const key = matchKey(idA, idB);
+    const res = MR[g] && MR[g][key];
+    const tA = T(idA), tB = T(idB);
+    return `<div class="match-row">
+      <span class="match-team">${tA.name}</span>
+      <div class="match-btns">
+        <button class="mbtn${res==='a'?' active-a':''}" onclick="setResult('${g}','${idA}','${idB}','a')">1</button>
+        <button class="mbtn${res==='e'?' active-e':''}" onclick="setResult('${g}','${idA}','${idB}','e')">X</button>
+        <button class="mbtn${res==='b'?' active-b':''}" onclick="setResult('${g}','${idA}','${idB}','b')">2</button>
+      </div>
+      <span class="match-team right">${tB.name}</span>
+    </div>`;
+  }).join('');
+
+  return `
+    <div class="ghdr">
+      <span class="gltr">Grupo ${g}</span>
+      <span class="gpts">${played}/6 partidos</span>
+    </div>
+    <table class="gtbl"><tbody>${rows}</tbody></table>
+    <div class="matches-section">
+      <div class="matches-lbl">1 gana local &nbsp;·&nbsp; X empate &nbsp;·&nbsp; 2 gana visitante</div>
+      ${matchRows}
+    </div>`;
+}
+
+function setResult(g, idA, idB, result) {
+  if (!MR[g]) MR[g] = {};
+  const key = matchKey(idA, idB);
+  // toggle: mismo resultado lo borra
+  if (MR[g][key] === result) delete MR[g][key];
+  else MR[g][key] = result;
+  saveState();
+  const card = document.getElementById('gc-'+g);
+  if (card) card.innerHTML = buildGroupHTML(g);
+  if (document.getElementById('sec-thirds').classList.contains('vis')) renderThirds();
+}
+
+// THIRDS
+function renderThirds() {
+  const all = GROUP_KEYS.map(g => ({ id: p3(g), g }));
+  document.getElementById('chips').innerHTML = all.map(({id, g}) => {
+    const t = T(id); const isSel = SEL3.includes(id); const locked = !isSel && SEL3.length >= 8;
+    return `<div class="chip${isSel?' sel':''}${locked?' lck':''}" onclick="toggleT3('${id}')">
+      ${getSpecimenThumb(t)}
+      <strong style="font-size:0.7rem">${t.name}</strong>
+      <span style="opacity:.4;font-size:.62rem;margin-left:4px">G${g}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('ccnt').innerHTML = `Seleccionados: <span>${SEL3.length}</span> / 8`;
+}
+
+function toggleT3(id) {
+  const i = SEL3.indexOf(id);
+  if (i > -1) { SEL3.splice(i,1); showToast('Removido de mejores terceros'); }
+  else {
+    if (SEL3.length >= 8) { showToast('Ya tenés 8 seleccionados'); return; }
+    SEL3.push(id); showToast(`Clasificado al cuadro (${SEL3.length}/8)`);
+  }
+  saveState();
+  renderThirds();
+}
+
+// BRACKET
+const R32 = [
+  {id:"p73", a:"2A", b:"2B"}, {id:"p74", a:"1E", b:"T3"}, {id:"p75", a:"1F", b:"2C"}, {id:"p76", a:"1C", b:"2F"},
+  {id:"p77", a:"1I", b:"T3"}, {id:"p78", a:"2E", b:"2I"}, {id:"p79", a:"1A", b:"T3"}, {id:"p80", a:"1L", b:"T3"},
+  {id:"p81", a:"1D", b:"T3"}, {id:"p82", a:"1G", b:"T3"}, {id:"p83", a:"2K", b:"2L"}, {id:"p84", a:"1H", b:"2J"},
+  {id:"p85", a:"1B", b:"T3"}, {id:"p86", a:"1J", b:"2H"}, {id:"p87", a:"1K", b:"T3"}, {id:"p88", a:"2D", b:"2G"},
+];
+const R16 = [
+  {id:"p89", a:"Wp74", b:"Wp77"}, {id:"p90", a:"Wp73", b:"Wp75"}, {id:"p91", a:"Wp76", b:"Wp78"}, {id:"p92", a:"Wp79", b:"Wp80"},
+  {id:"p93", a:"Wp83", b:"Wp84"}, {id:"p94", a:"Wp81", b:"Wp82"}, {id:"p95", a:"Wp86", b:"Wp88"}, {id:"p96", a:"Wp85", b:"Wp87"},
+];
+const QF = [
+  {id:"p97",  a:"Wp89", b:"Wp90"}, {id:"p98",  a:"Wp93", b:"Wp94"},
+  {id:"p99",  a:"Wp91", b:"Wp92"}, {id:"p100", a:"Wp95", b:"Wp96"},
+];
+const SF = [
+  {id:"p101", a:"Wp97", b:"Wp98"}, {id:"p102", a:"Wp99", b:"Wp100"},
+];
+const FINAL   = {id:"p104", a:"Wp101", b:"Wp102"};
+const THIRD_M = {id:"p103", a:"Lp101", b:"Lp102"};
+
+let t3cursor = 0;
+function resolveSlot(desc) {
+  if (!desc) return null;
+  if (/^1[A-L]$/.test(desc)) return p1(desc[1]);
+  if (/^2[A-L]$/.test(desc)) return p2(desc[1]);
+  if (desc === 'T3') { const v = SEL3[t3cursor]||null; t3cursor++; return v; }
+  if (desc.startsWith('Wp')) return KW[desc.slice(1)]||null;
+  if (desc.startsWith('Lp')) return KL[desc.slice(1)]||null;
+  return null;
+}
+
+function renderBracket() {
+  t3cursor = 0;
+  const cont = document.getElementById('bkt'); cont.innerHTML = '';
+  const resolved = {};
+  [...R32,...R16,...QF,...SF,FINAL,THIRD_M].forEach(m => {
+    resolved[m.id] = { a: resolveSlot(m.a), b: resolveSlot(m.b) };
+  });
+
+  const rounds = [
+    {lbl:'16avos de Final',     ms:R32,          rid:'bsec-16avos'},
+    {lbl:'Octavos de Final',    ms:R16,          rid:'bsec-8vos'},
+    {lbl:'Cuartos de Final',    ms:QF,           rid:'bsec-4tos'},
+    {lbl:'Semifinales y Final', ms:[...SF,FINAL],rid:'bsec-semis'},
+  ];
+
+  rounds.forEach(r => {
+    const sec = document.createElement('div'); sec.className = 'bsec'; sec.id = r.rid;
+    sec.innerHTML = `<div class="rlbl"><span>${r.lbl}</span> <button class="btn-mini-capt" onclick="exportPhaseAsImage('${r.rid}','ronda-${r.rid}')">📸 Capturar Ronda</button></div><div class="mgrid"></div>`;
+    r.ms.forEach(m => sec.querySelector('.mgrid').appendChild(buildBox(m, resolved[m.id].a, resolved[m.id].b)));
+    cont.appendChild(sec);
+  });
+
+  const tpsec = document.createElement('div'); tpsec.className = 'bsec'; tpsec.id = 'bsec-tercer-puesto';
+  tpsec.innerHTML = `<div class="rlbl"><span>Tercer Puesto</span></div><div class="mgrid"></div>`;
+  tpsec.querySelector('.mgrid').appendChild(buildBox(THIRD_M, resolved[THIRD_M.id].a, resolved[THIRD_M.id].b));
+  cont.appendChild(tpsec);
+  updateChamp();
+}
+
+function buildBox(m, tA, tB) {
+  const win = KW[m.id];
+  const box = document.createElement('div');
+  box.className = 'mbox'+(win?' done':''); box.id = 'mb-'+m.id;
+  box.innerHTML = `
+    <div class="mt${win===tA?' win':''}${!tA?' tbd':''}" onclick="pick('${m.id}','${tA||''}','${tB||''}','a')">${slotHtml(m.a,tA)}</div>
+    <div class="mt${win===tB?' win':''}${!tB?' tbd':''}" onclick="pick('${m.id}','${tA||''}','${tB||''}','b')">${slotHtml(m.b,tB)}</div>
+    <div class="mid">${m.id.toUpperCase()}</div>`;
+  return box;
+}
+
+function slotHtml(desc, id) {
+  if (id) {
+    const t = T(id);
+    return `<div style="display:flex;align-items:center;gap:0.3rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;">
+      ${getSpecimenThumb(t)}<span style="font-weight:600;font-size:0.7rem;">${t.name}</span>
+    </div>`;
+  }
+  if (desc==='T3') return '<span>3ro clasificado</span>';
+  if (/^[12][A-L]$/.test(desc)) return `<span>${desc[0]==='1'?'1°':'2°'} Grp ${desc[1]}</span>`;
+  if (desc.startsWith('Wp')) return `<span>G.${desc.slice(1).toUpperCase()}</span>`;
+  if (desc.startsWith('Lp')) return `<span>P.${desc.slice(1).toUpperCase()}</span>`;
+  return '<span>—</span>';
+}
+
+function pick(mid, tA, tB, side) {
+  const win = side==='a'?tA:tB, los = side==='a'?tB:tA;
+  if (!win) { showToast('Definición pendiente'); return; }
+  if (KW[mid]===win) { delete KW[mid]; delete KL[mid]; cascade(mid); showToast('Ganador removido'); }
+  else { KW[mid]=win; KL[mid]=los; showToast('Avanza ejemplar ✓'); }
+  saveState();
+  renderBracket();
+}
+
+function cascade(mid) {
+  const dW='Wp'+mid, dL='Lp'+mid;
+  [...R16,...QF,...SF,FINAL,THIRD_M].forEach(m => {
+    if (m.a===dW||m.b===dW||m.a===dL||m.b===dL) {
+      if (KW[m.id]) { cascade(m.id); delete KW[m.id]; delete KL[m.id]; }
+    }
+  });
+}
+
+function updateChamp() {
+  const id = KW['p104'];
+  const card = document.getElementById('ccard');
+  const imgFinal = document.getElementById('cimg-final');
+  if (id) {
+    const t = T(id);
+    document.getElementById('cnm').textContent = id.toUpperCase();
+    document.getElementById('csp').textContent = t.name;
+    if (t.wiki) {
+      fetchWikiImg(t.wiki).then(url => {
+        if (url) { imgFinal.src = url; imgFinal.style.display = 'block'; }
+      });
+    } else { imgFinal.style.display = 'none'; }
+    card.classList.add('show');
+  } else { card.classList.remove('show'); }
+}
+
+function exportPhaseAsImage(sectionId, fileName) {
+  showToast("Generando captura de pantalla...");
+  const target = document.getElementById(sectionId);
+  if (!target) { showToast("Error: Sección no encontrada"); return; }
+  const actionBars  = target.querySelectorAll('.actions-bar');
+  const miniButtons = target.querySelectorAll('.btn-mini-capt');
+  actionBars.forEach(el  => el.style.visibility = 'hidden');
+  miniButtons.forEach(el => el.style.visibility = 'hidden');
+  html2canvas(target, { backgroundColor:'#020C18', useCORS:true, allowTaint:false, scale:2, logging:false }).then(canvas => {
+    actionBars.forEach(el  => el.style.visibility = 'visible');
+    miniButtons.forEach(el => el.style.visibility = 'visible');
+    try {
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png'); a.download = `${fileName}.png`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      showToast("📸 ¡Captura guardada con éxito!");
+    } catch(e) { console.error(e); showToast("Error procesando imagen externa."); }
+  }).catch(err => {
+    console.error(err);
+    actionBars.forEach(el  => el.style.visibility = 'visible');
+    miniButtons.forEach(el => el.style.visibility = 'visible');
+    showToast("Error en renderización.");
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadState();
+  renderGroups();
+});
+</script>
+</body>
+</html>
